@@ -83,8 +83,12 @@ class BaseWechatClient:
     def request(self, method: str, url: str, **kwargs):
         raise NotImplementedError
 
-    def generate_signature(self, timestamp: str, nonce: str, encrypt: str):
-        data = [self._app_token, timestamp, nonce, encrypt]
+    def generate_signature(
+        self, timestamp: str, nonce: str, encrypt: Optional[str] = None
+    ):
+        data = [self._app_token, timestamp, nonce]
+        if encrypt is not None:
+            data.append(encrypt)
         data.sort()
         sha1 = hashlib.sha1()
         sha1.update("".join(data).encode())
@@ -93,13 +97,7 @@ class BaseWechatClient:
     def check_signature(
         self, signature: str, timestamp: str, nonce: str, encrypt: Optional[str] = None
     ):
-        data = [self._app_token, timestamp, nonce]
-        if encrypt is not None:
-            data.append(encrypt)
-        data.sort()
-        sha1 = hashlib.sha1()
-        sha1.update("".join(data).encode())
-        if sha1.hexdigest() == signature:
+        if signature == self.generate_signature(timestamp, nonce, encrypt):
             return True
         return False
 
@@ -155,7 +153,10 @@ class BaseWechatClient:
 
     def message_to_xml(self, message: Message) -> str:
         logger.debug(f"Converting message to XML: {message}")
-        return xmltodict.unparse({"xml": message.model_dump(exclude_none=True)})
+        return xmltodict.unparse(
+            {"xml": message.model_dump(mode="json", exclude_none=True)},
+            full_document=False,
+        )
 
     def xml_to_message(self, xml: str) -> GenericMessage:
         logger.debug(f"Converting XML to message: {xml}")

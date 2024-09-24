@@ -148,6 +148,7 @@ class GenericEvent(BaseEvent):
 
 
 class GenericMessage(GenericEvent):
+    Event: EventType | None = None
     FromUserName: str | None = None
     CreateTime: int | None = None
     MsgType: MessageType | None = None
