@@ -13,6 +13,9 @@ router = APIRouter()
 
 @router.get("")
 async def push_test(signature: str, timestamp: str, nonce: str, echostr: str):
+    logger.debug(
+        f"Received signature: {signature}, timestamp: {timestamp}, nonce: {nonce}, echostr: {echostr}"
+    )
     if wechat_client.check_signature(signature, timestamp, nonce):
         if echostr:
             return Response(content=echostr)
@@ -49,10 +52,28 @@ async def push(
                         MsgType=MessageType.TEXT,
                         content=f"Received encrypted event message: {event_message.Event}",
                     )
+                    content = wechat_client.message_to_xml(
+                        wechat_client.encrypt_message(text_message)
+                    )
+                    logger.debug(f"Responding with encrypted message: {content}")
                     return Response(
-                        content=wechat_client.message_to_xml(
-                            wechat_client.encrypt_message(text_message)
-                        ),
+                        content=content,
+                        media_type="application/xml",
+                    )
+                elif decrypted_message.MsgType == MessageType.TEXT:
+                    text_message = TextMessage(
+                        ToUserName=decrypted_message.FromUserName,
+                        FromUserName=decrypted_message.ToUserName,
+                        CreateTime=int(time.time()),
+                        MsgType=MessageType.TEXT,
+                        Content=f"Received encrypted text message: {decrypted_message.Content}",
+                    )
+                    content = wechat_client.message_to_xml(
+                        wechat_client.encrypt_message(text_message)
+                    )
+                    logger.debug(f"Responding with encrypted message: {content}")
+                    return Response(
+                        content=content,
                         media_type="application/xml",
                     )
                 return Response(content="success")
@@ -68,6 +89,25 @@ async def push(
                 MsgType=MessageType.TEXT,
                 Content=f"Received event message: {event_message.Event}",
             )
-            return wechat_client.message_to_xml(text_message)
+            content = wechat_client.message_to_xml(text_message)
+            logger.debug(f"Responding with message: {content}")
+            return Response(
+                content=content,
+                media_type="application/xml",
+            )
+        elif message.MsgType == MessageType.TEXT:
+            text_message = TextMessage(
+                ToUserName=message.FromUserName,
+                FromUserName=message.ToUserName,
+                CreateTime=int(time.time()),
+                MsgType=MessageType.TEXT,
+                Content=f"Received text message: {message.Content}",
+            )
+            content = wechat_client.message_to_xml(text_message)
+            logger.debug(f"Responding with message: {content}")
+            return Response(
+                content=content,
+                media_type="application/xml",
+            )
         return Response(content="success")
     return Response(content="Invalid Signature", status_code=400)
