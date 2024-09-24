@@ -68,7 +68,7 @@ def test_encrypt_text_message(wechat_client: WechatClient):
 
 
 def test_xml_to_message(wechat_client: WechatClient):
-    xml_message = "<xml><ToUserName><![CDATA[gh_399908c3505e]]></ToUserName>\n<FromUserName><![CDATA[oIqny6t2aR0L7dhDHr6qkm27kvxA]]></FromUserName>\n<CreateTime>1727187078</CreateTime>\n<MsgType><![CDATA[event]]></MsgType>\n<Event><![CDATA[unsubscribe]]></Event>\n<EventKey><![CDATA[]]></EventKey>\n</xml>" # noqa
+    xml_message = "<xml><ToUserName><![CDATA[gh_399908c3505e]]></ToUserName>\n<FromUserName><![CDATA[oIqny6t2aR0L7dhDHr6qkm27kvxA]]></FromUserName>\n<CreateTime>1727187078</CreateTime>\n<MsgType><![CDATA[event]]></MsgType>\n<Event><![CDATA[unsubscribe]]></Event>\n<EventKey><![CDATA[]]></EventKey>\n</xml>"  # noqa
     message = wechat_client.xml_to_message(xml_message)
     assert message is not None
     assert isinstance(message, GenericMessage)
@@ -93,5 +93,5 @@ def test_message_to_xml(wechat_client: WechatClient):
     assert isinstance(xml_message, str)
     assert (
         xml_message
-        == "<xml><ToUserName>oIqny6t2aR0L7dhDHr6qkm27kvxA</ToUserName><FromUserName>gh_399908c3505e</FromUserName><CreateTime>1727188435</CreateTime><MsgType>text</MsgType><Content>Received text message: hello</Content></xml>" # noqa
+        == "<xml><ToUserName>oIqny6t2aR0L7dhDHr6qkm27kvxA</ToUserName><FromUserName>gh_399908c3505e</FromUserName><CreateTime>1727188435</CreateTime><MsgType>text</MsgType><Content>Received text message: hello</Content></xml>"  # noqa
     )
